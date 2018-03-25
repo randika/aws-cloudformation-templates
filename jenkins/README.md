@@ -1,3 +1,5 @@
+aws-cloudformation-template-jenkins
+===
 CloudFormation template for a Jenkins server with automatic backup and recovery using S3.
 
 # Prerequisites
@@ -6,7 +8,7 @@ CloudFormation template for a Jenkins server with automatic backup and recovery 
  - VPC
  - Subnets
 
- # USAGE
+# Usage
  - Launch the stack via the AWS console, a script, or aws-cli.
 
 
@@ -27,4 +29,4 @@ CloudFormation template for a Jenkins server with automatic backup and recovery 
  ```
 
  ## AWS Console
- - CloudFormation -> Stacks -> Upload template 
+ - CloudFormation -> Stacks -> Upload template
