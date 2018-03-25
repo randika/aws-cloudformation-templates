@@ -2,17 +2,17 @@ aws-cloudformation-template-jenkins
 ===
 CloudFormation template for a Jenkins server with automatic backup and recovery using S3.
 
-# Prerequisites
+### Prerequisites
  - Route 53 hosted zone for the desired DNS address (e.g., yourdomain.com)
  - S3 bucket
  - VPC
  - Subnets
 
-# Usage
+### Usage
  - Launch the stack via the AWS console, a script, or aws-cli.
 
 
- ## AWS CLI
+ #### AWS CLI
 
  ```
  aws cloudformation create-stack \
@@ -28,5 +28,5 @@ CloudFormation template for a Jenkins server with automatic backup and recovery 
         ParameterKey=DnsZone,ParameterValue=<zone>
  ```
 
- ## AWS Console
+ #### AWS Console
  - CloudFormation -> Stacks -> Upload template
