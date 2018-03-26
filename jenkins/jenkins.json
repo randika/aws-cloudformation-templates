@@ -31,6 +31,11 @@
       "Type": "String",
       "Default": ""
     },
+    "Env": {
+      "Description": "Application Environment",
+      "Type": "String",
+      "Default": "dev"
+    },
     "SshKey": {
       "Description": "Name of an existing EC2 keypair to enable SSH access to the instances",
       "Default": "",
@@ -816,6 +821,14 @@
           "UnhealthyThreshold": "5",
           "Interval": "30",
           "Timeout": "5"
+        },
+        "Name": {
+          "Fn::Join": [
+            "-",
+            [
+              {"Ref": "AppEnv"},{"Ref": "AppIdentifier"},"elb"
+            ]
+          ]
         }
       }
     },
