@@ -19,7 +19,7 @@ CloudFormation template for a Jenkins server with automatic backup and recovery 
  ```
  aws cloudformation create-stack \
     --template-body file://jenkins.json \
-    --stack-name {AppIdentifier}-{stackName} \
+    --stack-name {AppEnv}-{AppId}-{AppComponent} \
     --capabilities CAPABILITY_IAM \
     --parameters \
         ParameterKey=SshKey,ParameterValue={key} \
@@ -29,7 +29,7 @@ CloudFormation template for a Jenkins server with automatic backup and recovery 
         ParameterKey=AdminSecurityGroup,ParameterValue={sg_id} \
         ParameterKey=DnsZone,ParameterValue={zone} \
         ParameterKey=AppEnv,ParameterValue={AppEnv} \
-        ParameterKey=AppIdentifier,ParameterValue={AppIdentifier}
+        ParameterKey=AppId,ParameterValue={AppId}
  ```
 
  #### AWS Console

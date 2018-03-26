@@ -26,7 +26,7 @@
       ],
       "ConstraintDescription": "must be a valid EC2 instance type."
     },
-    "AppIdentifier": {
+    "AppId": {
       "Description": "Application Identifier",
       "Type": "String",
       "Default": ""
@@ -830,14 +830,14 @@
           "Fn::Join": [
             "-",
             [
-              {"Ref": "AppEnv"},{"Ref": "AppIdentifier"},{"Ref": "AppComponent"}
+              {"Ref": "AppEnv"},{"Ref": "AppId"},{"Ref": "AppComponent"}
             ]
           ]
         },
         "Tags" : [
             {
                 "Key" : "app_id",
-                "Value" : { "Ref": "AppIdentifier"}
+                "Value" : { "Ref": "AppId"}
             },
             {
                 "Key" : "env",
