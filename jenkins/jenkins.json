@@ -26,9 +26,14 @@
       ],
       "ConstraintDescription": "must be a valid EC2 instance type."
     },
+    "AppIdentifier": {
+      "Description": "Application Identifier",
+      "Type": "String",
+      "Default": ""
+    },
     "SshKey": {
       "Description": "Name of an existing EC2 keypair to enable SSH access to the instances",
-      "Default": "awsdemo",
+      "Default": "",
       "Type": "AWS::EC2::KeyPair::KeyName"
     },
     "IPWhitelist": {
