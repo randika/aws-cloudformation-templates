@@ -35,7 +35,7 @@
       "Description": "Application Component name. (ex: web, db, build)",
       "Type": "String"
     },
-    "Env": {
+    "AppEnv": {
       "Description": "Application Environment",
       "Type": "String",
       "Default": "dev"
@@ -830,7 +830,7 @@
           "Fn::Join": [
             "-",
             [
-              {"Ref": "Env"},{"Ref": "AppIdentifier"},{"Ref": "AppComponent"}
+              {"Ref": "AppEnv"},{"Ref": "AppIdentifier"},{"Ref": "AppComponent"}
             ]
           ]
         },
@@ -841,7 +841,7 @@
             },
             {
                 "Key" : "env",
-                "Value" : { "Ref": "Env"}
+                "Value" : { "Ref": "AppEnv"}
             }
        ]
       }

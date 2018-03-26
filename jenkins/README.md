@@ -28,7 +28,7 @@ CloudFormation template for a Jenkins server with automatic backup and recovery 
         ParameterKey=Subnets,ParameterValue='{subnet_id_1}\,{subnet_id_2}' \
         ParameterKey=AdminSecurityGroup,ParameterValue={sg_id} \
         ParameterKey=DnsZone,ParameterValue={zone} \
-        ParameterKey=Env,ParameterValue={env} \
+        ParameterKey=AppEnv,ParameterValue={AppEnv} \
         ParameterKey=AppIdentifier,ParameterValue={AppIdentifier}
  ```
 
