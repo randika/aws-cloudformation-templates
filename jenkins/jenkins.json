@@ -31,6 +31,10 @@
       "Type": "String",
       "Default": ""
     },
+    "AppComponent": {
+      "Description": "Application Component name. (ex: web, db, build)",
+      "Type": "String"
+    },
     "Env": {
       "Description": "Application Environment",
       "Type": "String",
@@ -822,14 +826,24 @@
           "Interval": "30",
           "Timeout": "5"
         },
-        "Name": {
+        "LoadBalancerName": {
           "Fn::Join": [
             "-",
             [
-              {"Ref": "AppEnv"},{"Ref": "AppIdentifier"},"elb"
+              {"Ref": "Env"},{"Ref": "AppIdentifier"},{"Ref": "AppComponent"}
             ]
           ]
-        }
+        },
+        "Tags" : [
+            {
+                "Key" : "app_id",
+                "Value" : { "Ref": "AppIdentifier"}
+            },
+            {
+                "Key" : "env",
+                "Value" : { "Ref": "Env"}
+            }
+       ]
       }
     },
     "DnsRecord": {

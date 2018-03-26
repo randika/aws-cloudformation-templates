@@ -19,17 +19,17 @@ CloudFormation template for a Jenkins server with automatic backup and recovery 
  ```
  aws cloudformation create-stack \
     --template-body file://jenkins.json \
-    --stack-name <stackName> \
+    --stack-name {AppIdentifier}-{stackName} \
     --capabilities CAPABILITY_IAM \
     --parameters \
-        ParameterKey=SshKey,ParameterValue=<key> \
-        ParameterKey=S3Bucket,ParameterValue=<bucket> \
-        ParameterKey=VpcId,ParameterValue=<vpc_id> \
-        ParameterKey=Subnets,ParameterValue='<subnet_id_1>\,<subnet_id_2>' \
-        ParameterKey=AdminSecurityGroup,ParameterValue=<sg_id> \
-        ParameterKey=DnsZone,ParameterValue=<zone> \
-        ParameterKey=Env,ParameterValue=<Env> \
-        ParameterKey=AppIdentifier,ParameterValue=<AppIdentifier>
+        ParameterKey=SshKey,ParameterValue={key} \
+        ParameterKey=S3Bucket,ParameterValue={bucket} \
+        ParameterKey=VpcId,ParameterValue={vpc_id} \
+        ParameterKey=Subnets,ParameterValue='{subnet_id_1}\,{subnet_id_2}' \
+        ParameterKey=AdminSecurityGroup,ParameterValue={sg_id} \
+        ParameterKey=DnsZone,ParameterValue={zone} \
+        ParameterKey=Env,ParameterValue={env} \
+        ParameterKey=AppIdentifier,ParameterValue={AppIdentifier}
  ```
 
  #### AWS Console
