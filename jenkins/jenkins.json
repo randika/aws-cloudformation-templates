@@ -31,7 +31,7 @@
       "Type": "String",
       "Default": ""
     },
-    "AppComponent": {
+    "AppComponentId": {
       "Description": "Application Component name. (ex: web, db, build)",
       "Type": "String"
     },
@@ -830,7 +830,7 @@
           "Fn::Join": [
             "-",
             [
-              {"Ref": "AppEnv"},{"Ref": "AppId"},{"Ref": "AppComponent"}
+              {"Ref": "AppEnv"},{"Ref": "AppId"},{"Ref": "AppComponentId"}
             ]
           ]
         },

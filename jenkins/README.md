@@ -19,7 +19,7 @@ CloudFormation template for a Jenkins server with automatic backup and recovery 
  ```
  aws cloudformation create-stack \
     --template-body file://jenkins.json \
-    --stack-name {AppEnv}-{AppId}-{AppComponent} \
+    --stack-name {AppEnv}-{AppId}-{AppComponentId} \
     --capabilities CAPABILITY_IAM \
     --parameters \
         ParameterKey=SshKey,ParameterValue={key} \
