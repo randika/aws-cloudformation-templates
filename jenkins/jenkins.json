@@ -101,7 +101,7 @@
         "RetentionInDays": 7
       }
     },
-    "SwiftOtterJenkins": {
+    "IamJenkinsUser": {
       "Type": "AWS::IAM::User",
       "Properties": {
         "Policies": [
@@ -256,7 +256,7 @@
       "Type": "AWS::IAM::AccessKey",
       "Properties": {
         "UserName": {
-          "Ref": "SwiftOtterJenkins"
+          "Ref": "IamJenkinsUser"
         }
       }
     },
