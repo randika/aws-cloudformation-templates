@@ -29,7 +29,8 @@ CloudFormation template for a Jenkins server with automatic backup and recovery 
         ParameterKey=AdminSecurityGroup,ParameterValue={sg_id} \
         ParameterKey=DnsZone,ParameterValue={zone} \
         ParameterKey=AppEnv,ParameterValue={AppEnv} \
-        ParameterKey=AppId,ParameterValue={AppId}
+        ParameterKey=AppId,ParameterValue={AppId} \
+        ParameterKey=AppComponentId,ParameterValue={AppComponentId}
  ```
 
  #### AWS Console
