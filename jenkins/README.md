@@ -35,8 +35,9 @@ CloudFormation template for a Jenkins server with automatic backup and recovery 
  ```
 
  #### Parameters
- - {AppEnv} - (dev/stg/prd) 
+ - {AppEnv} - (dev/stg/prd)
  - {AppId} - Unique application Identifier => ex: yourAppId
+ - {InstanceType} - supported instance types (see InstanceType section in template)
 
  #### AWS Console
  - CloudFormation -> Stacks -> Upload template

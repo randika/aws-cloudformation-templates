@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Launches a Jenkins server.",
+  "Description": "Launches a Jenkins server",
   "Parameters": {
     "InstanceType": {
       "Description": "EC2 instance type",
@@ -59,15 +59,6 @@
       "Description": "What email address will receive the default Jenkins password",
       "Type": "String",
       "Default": ""
-    },
-    "DnsPrefix": {
-      "Description": "Prefix for Jenkins' DNS record (<prefix>.<zone>)",
-      "Type": "String",
-      "Default": "jenkins"
-    },
-    "DnsZone": {
-      "Description": "Route53-hosted zone to use for the DNS record (<prefix>.<zone>)",
-      "Type": "String"
     },
     "S3Bucket": {
       "Description": "Existing S3 bucket to use for Jenkins backups and restores",
@@ -292,11 +283,13 @@
         "Tags" : [
             {
                 "Key" : "app_id",
-                "Value" : { "Ref": "AppId"}
+                "Value" : { "Ref": "AppId"},
+                "PropagateAtLaunch" : "true"
             },
             {
                 "Key" : "env",
-                "Value" : { "Ref": "AppEnv"}
+                "Value" : { "Ref": "AppEnv"},
+                "PropagateAtLaunch" : "true"
             }
        ]
       }
@@ -755,76 +748,8 @@
        ]
       }
     },
-    "DnsRecord": {
-      "Type": "AWS::Route53::RecordSet",
-      "Properties": {
-        "HostedZoneName": {
-          "Fn::Join": [
-            "",
-            [
-              {
-                "Ref": "DnsZone"
-              },
-              "."
-            ]
-          ]
-        },
-        "Name": {
-          "Fn::Join": [
-            "",
-            [
-              {
-                "Ref": "DnsPrefix"
-              },
-              ".",
-              {
-                "Ref": "DnsZone"
-              },
-              "."
-            ]
-          ]
-        },
-        "Type": "CNAME",
-        "TTL": "900",
-        "ResourceRecords": [
-          {
-            "Fn::GetAtt": [
-              "ElasticLoadBalancer",
-              "DNSName"
-            ]
-          }
-        ]
-        ,
-        "Tags" : [
-            {
-                "Key" : "app_id",
-                "Value" : { "Ref": "AppId"}
-            },
-            {
-                "Key" : "env",
-                "Value" : { "Ref": "AppEnv"}
-            }
-       ]
-      }
-    },
     "WaitHandle": {
       "Type": "AWS::CloudFormation::WaitConditionHandle"
-    }
-  },
-  "Outputs": {
-    "DnsAddress": {
-      "Description": "Jenkins URL",
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "http://",
-            {
-              "Ref": "DnsRecord"
-            }
-          ]
-        ]
-      }
     }
   }
 }
