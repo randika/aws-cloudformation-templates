@@ -230,6 +230,16 @@
             },
             {
               "Effect": "Allow",
+              "Action": "ecs:*",
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": "ecr:*",
+              "Resource": "*"
+            }
+            {
+              "Effect": "Allow",
               "Action": [
                 "iam:PassRole",
                 "iam:ListInstanceProfiles",
@@ -637,7 +647,8 @@
               }, "\n"
             ]]
           }
-        }
+        },
+
       }
     },
     "LbSecurityGroup": {
