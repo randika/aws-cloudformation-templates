@@ -1,0 +1,98 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters" : {
+    "SourceCodeBucket" : {
+      "Type" : "String"
+    },
+    "BuildJar" : {
+      "Type" : "String"
+    },
+    "InstanceType" : {
+      "Type" : "String"
+    },
+    "AMI" : {
+      "Type" : "String"
+    },
+    "KeyName" : {
+      "Type" : "String"
+    },
+    "SubnetId": {
+      "Description": "List of VPC subnet IDs for the cluster",
+      "Type": "AWS::EC2::Subnet::Id"
+    }
+  },
+  "Resources": {
+    "RootRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version" : "2012-10-17",
+          "Statement": [ {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [ "ec2.amazonaws.com" ]
+            },
+            "Action": [ "sts:AssumeRole" ]
+            } ]
+          },
+          "Path": "/",
+          "Policies": [ {
+            "PolicyName": "root",
+            "PolicyDocument": {
+              "Version" : "2012-10-17",
+              "Statement": [ {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:Get*",
+                  "s3:List*"
+                ],
+                "Resource": {"Fn::Join" : [ "", [ "arn:aws:s3:::", {"Ref":"SourceCodeBucket"},"/*"] ] }
+                } ]
+              }
+              } ]
+            }
+          },
+          "RootInstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+              "Path": "/",
+              "Roles": [ {
+                "Ref": "RootRole"
+                } ]
+              }
+            },
+            "Ec2Instance":{
+              "Type":"AWS::EC2::Instance",
+              "Properties":{
+                "ImageId": {"Ref":"AMI"},
+                "InstanceType": {"Ref":"InstanceType"},
+                "KeyName":{"Ref":"KeyName"},
+                "SubnetId" : { "Ref" : "SubnetId" },
+                "IamInstanceProfile": {"Ref":"RootInstanceProfile"},
+                "UserData": {
+                  "Fn::Base64": {
+                    "Fn::Join": ["", [
+                      "#!/usr/bin/env bash\n",
+                      "aws s3 cp s3://", {
+                        "Ref": "SourceCodeBucket"
+                      },
+                      "/", {
+                        "Ref": "BuildJar"
+                      },
+                      " /home/ec2-user/",{
+                        "Ref": "BuildJar"
+                      }, "\n",
+                      "sudo yum -y install java-1.8.0\n",
+                      "sudo yum -y remove java-1.7.0-openjdk\n",
+                      "cd /home/ec2-user/\n",
+                      "sudo nohup java -jar ",{
+                        "Ref": "BuildJar"
+                      }," > ec2dep.log\n",
+                      "\n"
+                      ]]
+                    }
+                  }
+                }
+              }
+            }
+          }
