@@ -28,10 +28,15 @@ CloudFormation template for a Jenkins server with automatic backup and recovery 
         ParameterKey=Subnets,ParameterValue='{subnet_id_1}\,{subnet_id_2}' \
         ParameterKey=AdminSecurityGroup,ParameterValue={sg_id} \
         ParameterKey=DnsZone,ParameterValue={zone} \
+        ParameterKey=DnsPrefix,ParameterValue={AppId}-{AppComponentId} \
         ParameterKey=AppEnv,ParameterValue={AppEnv} \
         ParameterKey=AppId,ParameterValue={AppId} \
         ParameterKey=AppComponentId,ParameterValue={AppComponentId}
  ```
+
+ #### Parameters
+ - {AppEnv} - (dev/stg/prd) 
+ - {AppId} - Unique application Identifier => ex: yourAppId
 
  #### AWS Console
  - CloudFormation -> Stacks -> Upload template

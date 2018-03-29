@@ -288,7 +288,17 @@
           {
             "Ref": "ElasticLoadBalancer"
           }
-        ]
+        ],
+        "Tags" : [
+            {
+                "Key" : "app_id",
+                "Value" : { "Ref": "AppId"}
+            },
+            {
+                "Key" : "env",
+                "Value" : { "Ref": "AppEnv"}
+            }
+       ]
       }
     },
     "LaunchConfig": {
@@ -651,7 +661,17 @@
             "ToPort": "80",
             "CidrIp": "0.0.0.0/0"
           }
-        ]
+        ],
+        "Tags" : [
+            {
+                "Key" : "app_id",
+                "Value" : { "Ref": "AppId"}
+            },
+            {
+                "Key" : "env",
+                "Value" : { "Ref": "AppEnv"}
+            }
+       ]
       }
     },
     "ServerSecurityGroup": {
@@ -674,7 +694,17 @@
             "ToPort": "22",
             "CidrIp": {"Ref" : "IPWhitelist"}
           }
-        ]
+        ],
+        "Tags" : [
+            {
+                "Key" : "app_id",
+                "Value" : { "Ref": "AppId"}
+            },
+            {
+                "Key" : "env",
+                "Value" : { "Ref": "AppEnv"}
+            }
+       ]
       }
     },
     "ElasticLoadBalancer": {
@@ -764,6 +794,17 @@
             ]
           }
         ]
+        ,
+        "Tags" : [
+            {
+                "Key" : "app_id",
+                "Value" : { "Ref": "AppId"}
+            },
+            {
+                "Key" : "env",
+                "Value" : { "Ref": "AppEnv"}
+            }
+       ]
       }
     },
     "WaitHandle": {
