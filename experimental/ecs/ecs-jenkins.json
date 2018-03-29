@@ -1,296 +1,152 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Launches a Jenkins server.",
+
+  "Description": "AWS CloudFormation Sample Template Create a load balanced Jenkins CI server with Docker installed. The application is using CloudWatch logs **WARNING** This template creates an Amazon EC2 instance in an Autoscaling group. You will be billed for the AWS resources used if you create a stack from this template.",
+
   "Parameters": {
     "InstanceType": {
-      "Description": "EC2 instance type",
+      "Description": "WebServer EC2 instance type",
       "Type": "String",
-      "Default": "t2.small",
-      "AllowedValues": [
-        "t1.micro",
-        "t2.small",
-        "m1.small",
-        "m1.medium",
-        "m1.large",
-        "m1.xlarge",
-        "m2.xlarge",
-        "m2.2xlarge",
-        "m2.4xlarge",
-        "m3.xlarge",
-        "m3.2xlarge",
-        "c1.medium",
-        "c1.xlarge",
-        "cc1.4xlarge",
-        "cc2.8xlarge",
-        "cg1.4xlarge"
-      ],
+      "Default": "t2.micro",
+      "AllowedValues": ["t1.micro", "t2.micro", "t2.small", "t2.medium", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge"],
       "ConstraintDescription": "must be a valid EC2 instance type."
     },
-    "AppId": {
-      "Description": "Application Identifier",
+
+    "EcsStackName": {
+      "Description": "Name of an active CloudFormation stack that contains the ecs resources, such as the subnet and security group, that will be used in this stack.",
       "Type": "String",
-      "Default": ""
+      "MinLength" : 1,
+      "MaxLength" : 255,
+      "AllowedPattern" : "^[a-zA-Z][-a-zA-Z0-9]*$",
+      "Default" : "EcsClusterStack"
     },
-    "AppComponentId": {
-      "Description": "Application Component name. (ex: web, db, build)",
-      "Type": "String"
-    },
-    "AppEnv": {
-      "Description": "Application Environment",
+
+    "SSHLocation": {
+      "Description": "The IP address range that can be used to SSH to the EC2 instances",
       "Type": "String",
-      "Default": "dev"
-    },
-    "SshKey": {
-      "Description": "Name of an existing EC2 keypair to enable SSH access to the instances",
-      "Default": "",
-      "Type": "AWS::EC2::KeyPair::KeyName"
-    },
-    "IPWhitelist": {
-      "Description": "IP Address to Whitelist (your IP address followed by /32)",
       "MinLength": "9",
       "MaxLength": "18",
-      "Type": "String",
+      "Default": "0.0.0.0/0",
       "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
-      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x.",
-      "Default": "0.0.0.0/0"
+      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+    }
 
-    },
-    "EmailAddress": {
-      "Description": "What email address will receive the default Jenkins password",
-      "Type": "String",
-      "Default": ""
-    },
-    "DnsPrefix": {
-      "Description": "Prefix for Jenkins' DNS record (<prefix>.<zone>)",
-      "Type": "String",
-      "Default": "jenkins"
-    },
-    "DnsZone": {
-      "Description": "Route53-hosted zone to use for the DNS record (<prefix>.<zone>)",
-      "Type": "String"
-    },
-    "S3Bucket": {
-      "Description": "Existing S3 bucket to use for Jenkins backups and restores",
-      "Type": "String"
-    },
-    "S3Prefix": {
-      "Description": "[Optional] Key prefix to use for Jenkins backups",
-      "Type": "String",
-      "Default": ""
-    },
-    "Subnets": {
-      "Description": "List of VPC subnet IDs for the cluster",
-      "Type": "List<AWS::EC2::Subnet::Id>"
-    },
-    "VpcId": {
-      "Description": "VPC associated with the provided subnets",
-      "Type": "AWS::EC2::VPC::Id"
-    },
-    "AdminSecurityGroup": {
-      "Description": "Existing security group that should be granted administrative access to Jenkins (e.g., 'sg-123456')",
-      "Default": "Primary",
-      "Type": "AWS::EC2::SecurityGroup::Id"
-    }
   },
+
   "Mappings": {
-    "RegionMap": {
-      "us-east-1": {
-        "AMI": "ami-6869aa05"
-      },
-      "us-west-1": {
-        "AMI": "ami-7172b611"
-      },
-      "us-west-2": {
-        "AMI": "ami-31490d51"
-      },
-      "eu-west-1": {
-        "AMI": "ami-f9dd458a"
-      }
+    "AWSInstanceType2Arch": {
+      "t1.micro"    : { "Arch": "PV64" },
+      "t2.micro"    : { "Arch": "HVM64" },
+      "t2.small"    : { "Arch": "HVM64" },
+      "t2.medium"   : { "Arch": "HVM64" },
+      "m3.medium"   : { "Arch": "HVM64" },
+      "m3.large"    : { "Arch": "HVM64" },
+      "m3.xlarge"   : { "Arch": "HVM64" },
+      "m3.2xlarge"  : { "Arch": "HVM64" },
+      "c3.large"    : { "Arch": "HVM64" },
+      "c3.xlarge"   : { "Arch": "HVM64" },
+      "c3.2xlarge"  : { "Arch": "HVM64" },
+      "c3.4xlarge"  : { "Arch": "HVM64" },
+      "c3.8xlarge"  : { "Arch": "HVM64" },
+      "c4.large"    : { "Arch": "HVM64" },
+      "c4.xlarge"   : { "Arch": "HVM64" },
+      "c4.2xlarge"  : { "Arch": "HVM64" },
+      "c4.4xlarge"  : { "Arch": "HVM64" },
+      "c4.8xlarge"  : { "Arch": "HVM64" },
+      "r3.large"    : { "Arch": "HVM64" },
+      "r3.xlarge"   : { "Arch": "HVM64" },
+      "r3.2xlarge"  : { "Arch": "HVM64" },
+      "r3.4xlarge"  : { "Arch": "HVM64" },
+      "r3.8xlarge"  : { "Arch": "HVM64" },
+      "i2.xlarge"   : { "Arch": "HVM64" },
+      "i2.2xlarge"  : { "Arch": "HVM64" },
+      "i2.4xlarge"  : { "Arch": "HVM64" },
+      "i2.8xlarge"  : { "Arch": "HVM64" },
+      "hi1.4xlarge" : { "Arch": "HVM64" },
+      "hs1.8xlarge" : { "Arch": "HVM64" },
+      "cr1.8xlarge" : { "Arch": "HVM64" },
+      "cc2.8xlarge" : { "Arch": "HVM64" }
+    },
+    "AWSRegionArch2AMI": {
+      "us-east-1"       : { "PV64": "ami-f0ea638a", "HVM64": "ami-55ef662f" },
+      "us-west-2"       : { "PV64": "ami-da4694a2", "HVM64": "ami-bf4193c7" },
+      "us-west-1"       : { "PV64": "ami-3b1e265b", "HVM64": "ami-a51f27c5" },
+      "eu-west-1"       : { "PV64": "ami-889622f1", "HVM64": "ami-1a962263" },
+      "eu-central-1"    : { "PV64": "ami-2928ab46", "HVM64": "ami-bf2ba8d0" },
+      "ap-northeast-1"  : { "PV64": "ami-99982aff", "HVM64": "ami-da9e2cbc" },
+      "ap-southeast-1"  : { "PV64": "ami-3f3d6a5c", "HVM64": "ami-c63d6aa5" },
+      "ap-southeast-2"  : { "PV64": "ami-3249a250", "HVM64": "ami-ff4ea59d" },
+      "sa-east-1"       : { "PV64": "ami-b96c29d5", "HVM64": "ami-286f2a44" }
     }
   },
+
   "Resources": {
+
     "CloudFormationLogs": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
         "RetentionInDays": 7
       }
     },
-    "IamJenkinsUser": {
-      "Type": "AWS::IAM::User",
-      "Properties": {
-        "Policies": [
-          {
-            "PolicyName": "S3Access",
-            "PolicyDocument": {
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": "s3:*",
-                  "Resource": {
-                    "Fn::Join": [
-                      "",
-                      [
-                        "arn:aws:s3:::",
-                        {
-                          "Ref": "S3Bucket"
-                        },
-                        "/*"
-                      ]
-                    ]
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "PolicyName": "IAMAccess",
-            "PolicyDocument": {
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "NotAction": "iam:*",
-                  "Resource": "*"
-                }
-              ]
-            }
-          },
-          {
-            "PolicyName": "EC2Access",
-            "PolicyDocument": {
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": "ec2:*",
-                  "Resource": "*"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "BuildRole": {
+
+    "JenkinsRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "ec2.amazonaws.com"
-                ]
-              },
-              "Action": [
-                "sts:AssumeRole"
-              ]
-            }
-          ]
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [ "ec2.amazonaws.com" ]
+            },
+            "Action": ["sts:AssumeRole"]
+          }]
         },
-        "Policies": [
-          {
-            "PolicyName": "root",
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": "*",
-                  "Resource": "*"
-                }
+        "ManagedPolicyArns":["arn:aws:iam::aws:policy/AmazonEC2ContainerServiceFullAccess","arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"],
+        "Path": "/",
+        "Policies": [{
+          "PolicyName": "JenkinsRolePolicy",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": ["logs:*"],
+              "Resource": [
+                "arn:aws:logs:*:*:*"
               ]
-            }
+            }, {
+              "Effect": "Allow",
+              "Action": "ecs:*",
+              "Resource": "*"
+            }]
           }
-        ]
+        }]
       }
     },
-    "RolePolicies": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyName": "root",
-        "PolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Action": "ec2:*",
-              "Effect": "Allow",
-              "Resource": "*"
-            },
-            {
-              "Effect": "Allow",
-              "Action": "elasticloadbalancing:*",
-              "Resource": "*"
-            },
-            {
-              "Effect": "Allow",
-              "Action": "cloudwatch:*",
-              "Resource": "*"
-            },
-            {
-              "Effect": "Allow",
-              "Action": "autoscaling:*",
-              "Resource": "*"
-            },
-            {
-              "Effect": "Allow",
-              "Action": "s3:*",
-              "Resource": "*"
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "iam:PassRole",
-                "iam:ListInstanceProfiles",
-                "ec2:*"
-              ],
-              "Resource": "*"
-            }
-          ]
-        },
-        "Roles": [
-          {
-            "Ref": "BuildRole"
-          }
-        ]
-      }
-    },
-    "BuildInstanceProfile": {
+
+    "JenkinsInstanceProfile": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Path": "/",
-        "Roles": [
-          {
-            "Ref": "BuildRole"
-          }
-        ]
+        "Roles": [{
+          "Ref": "JenkinsRole"
+        }]
       }
     },
-    "HostKeys": {
-      "Type": "AWS::IAM::AccessKey",
-      "Properties": {
-        "UserName": {
-          "Ref": "IamJenkinsUser"
-        }
-      }
-    },
-    "ServerGroup": {
+
+    "WebServerGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
-        "VPCZoneIdentifier" : { "Ref" : "Subnets" },
+        "AvailabilityZones": ["us-east-1a", "us-east-1b"],
+        "VPCZoneIdentifier": ["subnet-0555092a", "subnet-621afe28"],
         "LaunchConfigurationName": {
           "Ref": "LaunchConfig"
         },
         "MinSize": "1",
-        "MaxSize": "1",
-        "DesiredCapacity": "1",
-        "LoadBalancerNames": [
-          {
-            "Ref": "ElasticLoadBalancer"
-          }
-        ]
+        "MaxSize": "1"
       }
     },
+
     "LaunchConfig": {
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Metadata": {
@@ -546,17 +402,15 @@
       },
 
       "Properties": {
-        "KeyName": {
-          "Ref": "SshKey"
-        },
+        "KeyName": "awsdemo",
         "ImageId": {
-          "Fn::FindInMap": [
-         "RegionMap",
-         {
-           "Ref": "AWS::Region"
-         },
-         "AMI"
-       ]
+          "Fn::FindInMap": ["AWSRegionArch2AMI", {
+            "Ref": "AWS::Region"
+          }, {
+            "Fn::FindInMap": ["AWSInstanceType2Arch", {
+              "Ref": "InstanceType"
+            }, "Arch"]
+          }]
         },
         "BlockDeviceMappings": [{
           "DeviceName": "/dev/xvda",
@@ -566,13 +420,13 @@
           }
         }],
         "SecurityGroups": [{
-          "Ref": "ServerSecurityGroup"
+          "Ref": "InstanceSecurityGroup"
         }],
         "InstanceType": {
           "Ref": "InstanceType"
         },
         "IamInstanceProfile": {
-          "Ref": "BuildInstanceProfile"
+          "Ref": "JenkinsInstanceProfile"
         },
         "UserData": {
           "Fn::Base64": {
@@ -637,152 +491,25 @@
         }
       }
     },
-    "LbSecurityGroup": {
+
+    "InstanceSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "Jenkins LBs",
-        "VpcId": {
-          "Ref": "VpcId"
-        },
-        "SecurityGroupIngress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "80",
-            "ToPort": "80",
-            "CidrIp": "0.0.0.0/0"
+        "GroupDescription": "Enable SSH access and HTTP from anywhere",
+        "VpcId": "vpc-3f63b144",
+        "SecurityGroupIngress": [{
+          "IpProtocol": "tcp",
+          "FromPort": "22",
+          "ToPort": "22",
+          "CidrIp": {
+            "Ref": "SSHLocation"
           }
-        ]
-      }
-    },
-    "ServerSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "Jenkins servers",
-        "VpcId": {
-          "Ref": "VpcId"
-        },
-        "SecurityGroupIngress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "8080",
-            "ToPort": "8080",
-            "CidrIp": "0.0.0.0/0"
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "22",
-            "ToPort": "22",
-            "CidrIp": {"Ref" : "IPWhitelist"}
-          }
-        ]
-      }
-    },
-    "ElasticLoadBalancer": {
-      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
-      "Properties": {
-        "SecurityGroups": [
-          {
-            "Ref": "LbSecurityGroup"
-          },
-          {
-            "Ref": "AdminSecurityGroup"
-          }
-        ],
-        "Subnets": {
-          "Ref": "Subnets"
-        },
-        "Listeners": [
-          {
-            "LoadBalancerPort": "80",
-            "InstancePort": "8080",
-            "Protocol": "HTTP"
-          }
-        ],
-        "HealthCheck": {
-          "Target": "TCP:8080",
-          "HealthyThreshold": "3",
-          "UnhealthyThreshold": "5",
-          "Interval": "30",
-          "Timeout": "5"
-        },
-        "LoadBalancerName": {
-          "Fn::Join": [
-            "-",
-            [
-              {"Ref": "AppEnv"},{"Ref": "AppId"},{"Ref": "AppComponentId"}
-            ]
-          ]
-        },
-        "Tags" : [
-            {
-                "Key" : "app_id",
-                "Value" : { "Ref": "AppId"}
-            },
-            {
-                "Key" : "env",
-                "Value" : { "Ref": "AppEnv"}
-            }
-       ]
-      }
-    },
-    "DnsRecord": {
-      "Type": "AWS::Route53::RecordSet",
-      "Properties": {
-        "HostedZoneName": {
-          "Fn::Join": [
-            "",
-            [
-              {
-                "Ref": "DnsZone"
-              },
-              "."
-            ]
-          ]
-        },
-        "Name": {
-          "Fn::Join": [
-            "",
-            [
-              {
-                "Ref": "DnsPrefix"
-              },
-              ".",
-              {
-                "Ref": "DnsZone"
-              },
-              "."
-            ]
-          ]
-        },
-        "Type": "CNAME",
-        "TTL": "900",
-        "ResourceRecords": [
-          {
-            "Fn::GetAtt": [
-              "ElasticLoadBalancer",
-              "DNSName"
-            ]
-          }
-        ]
-      }
-    },
-    "WaitHandle": {
-      "Type": "AWS::CloudFormation::WaitConditionHandle"
-    }
-  },
-  "Outputs": {
-    "DnsAddress": {
-      "Description": "Jenkins URL",
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "http://",
-            {
-              "Ref": "DnsRecord"
-            }
-          ]
-        ]
+        }, {
+          "IpProtocol": "tcp",
+          "FromPort": "80",
+          "ToPort": "80",
+          "CidrIp": "0.0.0.0/0"
+        }]
       }
     }
   }
