@@ -171,26 +171,16 @@
 				"InternetGatewayId": {"Ref": "InternetGateway"}
 			}
 		},
-		"SubnetA": {
-			"Type": "AWS::EC2::Subnet",
-			"Properties": {
-				"AvailabilityZone": {"Fn::Select": ["0", {"Fn::GetAZs": ""}]},
-				"CidrBlock": "172.31.38.0/24",
-				"VpcId": {"Ref": "VpcId"}
-			}
-		},
-		"SubnetB": {
-			"Type": "AWS::EC2::Subnet",
-			"Properties": {
-				"AvailabilityZone": {"Fn::Select": ["1", {"Fn::GetAZs": ""}]},
-				"CidrBlock": "172.31.37.0/24",
-				"VpcId": {"Ref": "VpcId"}
-			}
-		},
+    "Subnets": {
+      "Description": "List of VPC subnet IDs",
+      "Type": "List<AWS::EC2::Subnet::Id>"
+    },
 		"LoadBalancer": {
 			"Type": "AWS::ElasticLoadBalancing::LoadBalancer",
 			"Properties": {
-				"Subnets": [{"Ref": "SubnetA"}, {"Ref": "SubnetB"}],
+				"Subnets": {
+          "Ref": "Subnets"
+        },
 				"LoadBalancerName": "sample-elb",
 				"Listeners": [{
 					"InstancePort": "8080",
@@ -214,7 +204,7 @@
 			"Type": "AWS::EC2::SecurityGroup",
 			"Properties": {
 				"GroupDescription": "sample-elb-sg",
-				"VpcId": {"Ref": "VPC"},
+				"VpcId": {"Ref": "VpcId"},
 				"SecurityGroupIngress": [{
 					"CidrIp": "0.0.0.0/0",
 					"FromPort": "80",
@@ -239,25 +229,6 @@
 					"SourceSecurityGroupId": {"Ref": "LoadBalancerSecurityGroup"},
 					"ToPort": "8080"
 				}]
-			}
-		},"DatabaseSecurityGroup": {
-			"Type": "AWS::EC2::SecurityGroup",
-			"Properties": {
-				"GroupDescription": "database-sg",
-				"VpcId": {"Ref": "VPC"},
-				"SecurityGroupIngress": [{
-					"IpProtocol": "tcp",
-					"FromPort": "3306",
-					"ToPort": "3306",
-					"SourceSecurityGroupId": {"Ref": "WebServerSecurityGroup"}
-				}]
-			}
-		},
-		"DBSubnetGroup" : {
-			"Type" : "AWS::RDS::DBSubnetGroup",
-			"Properties" : {
-				"DBSubnetGroupDescription" : "DB subnet group",
-				"SubnetIds": [{"Ref": "SubnetA"}, {"Ref": "SubnetB"}]
 			}
 		},
 		"LaunchConfiguration": {
@@ -327,7 +298,7 @@
 				"MinSize": "2",
 				"MaxSize": "2",
 				"DesiredCapacity": "2",
-				"VPCZoneIdentifier": [{"Ref": "SubnetA"}, {"Ref": "SubnetB"}]
+				"VPCZoneIdentifier": { "Ref" : "Subnets" }
 			},
 			"CreationPolicy": {
 				"ResourceSignal": {
