@@ -160,11 +160,6 @@
 				]
 			}
 		},
-		"InternetGateway": {
-			"Type": "AWS::EC2::InternetGateway",
-			"Properties": {
-			}
-		},
 		"VPCGatewayAttachment": {
 			"Type": "AWS::EC2::VPCGatewayAttachment",
 			"Properties": {
@@ -172,10 +167,6 @@
 				"InternetGatewayId": {"Ref": "InternetGateway"}
 			}
 		},
-    "Subnets": {
-      "Description": "List of VPC subnet IDs",
-      "Type": "List<AWS::EC2::Subnet::Id>"
-    },
 		"LoadBalancer": {
 			"Type": "AWS::ElasticLoadBalancing::LoadBalancer",
 			"Properties": {
