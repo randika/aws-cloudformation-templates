@@ -160,13 +160,6 @@
 				]
 			}
 		},
-		"VPCGatewayAttachment": {
-			"Type": "AWS::EC2::VPCGatewayAttachment",
-			"Properties": {
-				"VpcId": {"Ref": "VpcId"},
-				"InternetGatewayId": {"Ref": "InternetGateway"}
-			}
-		},
 		"LoadBalancer": {
 			"Type": "AWS::ElasticLoadBalancing::LoadBalancer",
 			"Properties": {
