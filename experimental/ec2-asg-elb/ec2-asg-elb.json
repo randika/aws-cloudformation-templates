@@ -5,7 +5,15 @@
 		"KeyName": {
 			"Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
 			"Type": "AWS::EC2::KeyPair::KeyName"
-		}
+		},
+    "VpcId": {
+      "Description": "VPC associated with the provided subnets",
+      "Type": "AWS::EC2::VPC::Id"
+    },
+    "Subnets": {
+      "Description": "List of VPC subnet IDs for the cluster",
+      "Type": "List<AWS::EC2::Subnet::Id>"
+    }
 	},
 	"Metadata" : {
 		"AWS::CloudFormation::Interface" : {
@@ -150,13 +158,6 @@
 						"Ref": "InstanceRole"
 					}
 				]
-			}
-		},
-		"VPC": {
-			"Type": "AWS::EC2::VPC",
-			"Properties": {
-				"CidrBlock": "172.31.0.0/16",
-				"EnableDnsHostnames": "true"
 			}
 		},
 		"InternetGateway": {
