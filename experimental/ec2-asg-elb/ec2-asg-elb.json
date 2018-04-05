@@ -181,7 +181,17 @@
 					"UnhealthyThreshold": "2"
 				},
 				"SecurityGroups": [{"Ref": "LoadBalancerSecurityGroup"}],
-				"Scheme": "internet-facing"
+				"Scheme": "internet-facing",
+				"Tags" : [
+						{
+								"Key" : "app_id",
+								"Value" : { "Ref": "AppId"}
+						},
+						{
+								"Key" : "env",
+								"Value" : { "Ref": "AppEnv"}
+						}
+			 ]
 			}
 		},
 		"LoadBalancerSecurityGroup": {
