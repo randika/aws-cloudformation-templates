@@ -13,7 +13,21 @@
     "Subnets": {
       "Description": "List of VPC subnet IDs for the cluster",
       "Type": "List<AWS::EC2::Subnet::Id>"
-    }
+    },
+		"AppId": {
+			"Description": "Application Identifier",
+			"Type": "String",
+			"Default": ""
+		},
+		"AppComponentId": {
+			"Description": "Application Component name. (ex: web, db, build)",
+			"Type": "String"
+		},
+		"AppEnv": {
+			"Description": "Application Environment",
+			"Type": "String",
+			"Default": "dev"
+		}
 	},
 	"Metadata" : {
 		"AWS::CloudFormation::Interface" : {
@@ -205,6 +219,17 @@
 					"IpProtocol": "tcp",
 					"ToPort": "80"
 				}]
+				,
+				"Tags" : [
+						{
+								"Key" : "app_id",
+								"Value" : { "Ref": "AppId"}
+						},
+						{
+								"Key" : "env",
+								"Value" : { "Ref": "AppEnv"}
+						}
+			 ]
 			}
 		},
 		"WebServerSecurityGroup": {
@@ -222,7 +247,17 @@
 					"IpProtocol": "tcp",
 					"SourceSecurityGroupId": {"Ref": "LoadBalancerSecurityGroup"},
 					"ToPort": "8080"
-				}]
+				}],
+				"Tags" : [
+						{
+								"Key" : "app_id",
+								"Value" : { "Ref": "AppId"}
+						},
+						{
+								"Key" : "env",
+								"Value" : { "Ref": "AppEnv"}
+						}
+			 ]
 			}
 		},
 		"LaunchConfiguration": {
@@ -281,7 +316,19 @@
                     "chmod +x ./install\n",
                     "./install auto\n",
                     "/opt/aws/bin/cfn-signal -e $? --stack ", {"Ref": "AWS::StackName"}, " --resource AutoScalingGroup --region ", {"Ref": "AWS::Region"}, "\n"
-                ]]}}
+                ]]}},
+								"Tags" : [
+										{
+												"Key" : "app_id",
+												"Value" : { "Ref": "AppId"},
+												"PropagateAtLaunch" : "true"
+										},
+										{
+												"Key" : "env",
+												"Value" : { "Ref": "AppEnv"},
+												"PropagateAtLaunch" : "true"
+										}
+							 ]
 			}
 		},
 		"AutoScalingGroup": {
@@ -292,7 +339,19 @@
 				"MinSize": "2",
 				"MaxSize": "2",
 				"DesiredCapacity": "2",
-				"VPCZoneIdentifier": { "Ref" : "Subnets" }
+				"VPCZoneIdentifier": { "Ref" : "Subnets" },
+				"Tags" : [
+						{
+								"Key" : "app_id",
+								"Value" : { "Ref": "AppId"},
+								"PropagateAtLaunch" : "true"
+						},
+						{
+								"Key" : "env",
+								"Value" : { "Ref": "AppEnv"},
+								"PropagateAtLaunch" : "true"
+						}
+			 ]
 			},
 			"CreationPolicy": {
 				"ResourceSignal": {
