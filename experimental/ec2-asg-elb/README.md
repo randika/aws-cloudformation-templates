@@ -1,3 +1,4 @@
+```
 aws cloudformation create-stack \
    --template-body file://ec2-asg-elb.json \
    --stack-name {AppEnv}-{AppId}-{AppComponentId} \
@@ -9,3 +10,4 @@ aws cloudformation create-stack \
        ParameterKey=AppEnv,ParameterValue={AppEnv} \
        ParameterKey=AppId,ParameterValue={AppId} \
        ParameterKey=AppComponentId,ParameterValue={AppComponentId}
+```
