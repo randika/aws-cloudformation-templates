@@ -1,0 +1,309 @@
+{
+  "Description": "This template deploys a VPC, with a pair of public and private subnets spread\nacross two Availability Zones. It deploys an Internet Gateway, with a default\nroute on the public subnets. It deploys a pair of NAT Gateways (one in each AZ),\nand default routes for them in the private subnets.",
+  "Parameters": {
+    "EnvironmentName": {
+      "Description": "An environment name that will be prefixed to resource names",
+      "Type": "String"
+    },
+    "VpcCIDR": {
+      "Description": "Please enter the IP range (CIDR notation) for this VPC",
+      "Type": "String",
+      "Default": "10.192.0.0/16"
+    },
+    "Subnet-Public1CIDR": {
+      "Description": "Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone",
+      "Type": "String",
+      "Default": "10.192.10.0/24"
+    },
+    "Subnet-Public2CIDR": {
+      "Description": "Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone",
+      "Type": "String",
+      "Default": "10.192.11.0/24"
+    },
+    "Subnet-Private1CIDR": {
+      "Description": "Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone",
+      "Type": "String",
+      "Default": "10.192.20.0/24"
+    },
+    "Subnet-Private2CIDR": {
+      "Description": "Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone",
+      "Type": "String",
+      "Default": "10.192.21.0/24"
+    }
+  },
+  "Resources": {
+    "VPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "VpcCIDR",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "EnvironmentName"
+          }
+        ]
+      }
+    },
+    "InternetGateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "EnvironmentName"
+          }
+        ]
+      }
+    },
+    "InternetGatewayAttachment": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "InternetGatewayId": "InternetGateway",
+        "VpcId": "VPC"
+      }
+    },
+    "Subnet-Public1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": "VPC",
+        "AvailabilityZone": [
+          0,
+          null
+        ],
+        "CidrBlock": "Subnet-Public1CIDR",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "${EnvironmentName} Public Subnet (AZ1)"
+          }
+        ]
+      }
+    },
+    "Subnet-Public2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": "VPC",
+        "AvailabilityZone": [
+          1,
+          null
+        ],
+        "CidrBlock": "Subnet-Public2CIDR",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "${EnvironmentName} Public Subnet (AZ2)"
+          }
+        ]
+      }
+    },
+    "Subnet-Private1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": "VPC",
+        "AvailabilityZone": [
+          0,
+          null
+        ],
+        "CidrBlock": "Subnet-Private1CIDR",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "${EnvironmentName} Private Subnet (AZ1)"
+          }
+        ]
+      }
+    },
+    "Subnet-Private2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": "VPC",
+        "AvailabilityZone": [
+          1,
+          null
+        ],
+        "CidrBlock": "Subnet-Private2CIDR",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "${EnvironmentName} Private Subnet (AZ2)"
+          }
+        ]
+      }
+    },
+    "NatGateway1EIP": {
+      "Type": "AWS::EC2::EIP",
+      "DependsOn": "InternetGatewayAttachment",
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "NatGateway2EIP": {
+      "Type": "AWS::EC2::EIP",
+      "DependsOn": "InternetGatewayAttachment",
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "NatGateway1": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": "NatGateway1EIP.AllocationId",
+        "SubnetId": "Subnet-Public1"
+      }
+    },
+    "NatGateway2": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": "NatGateway2EIP.AllocationId",
+        "SubnetId": "Subnet-Public2"
+      }
+    },
+    "PublicRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": "VPC",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "${EnvironmentName} Public Routes"
+          }
+        ]
+      }
+    },
+    "DefaultPublicRoute": {
+      "Type": "AWS::EC2::Route",
+      "DependsOn": "InternetGatewayAttachment",
+      "Properties": {
+        "RouteTableId": "PublicRouteTable",
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": "InternetGateway"
+      }
+    },
+    "Subnet-Public1RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": "PublicRouteTable",
+        "SubnetId": "Subnet-Public1"
+      }
+    },
+    "Subnet-Public2RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": "PublicRouteTable",
+        "SubnetId": "Subnet-Public2"
+      }
+    },
+    "PrivateRouteTable1": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": "VPC",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "${EnvironmentName} Private Routes (AZ1)"
+          }
+        ]
+      }
+    },
+    "DefaultPrivateRoute1": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": "PrivateRouteTable1",
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": "NatGateway1"
+      }
+    },
+    "Subnet-Private1RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": "PrivateRouteTable1",
+        "SubnetId": "Subnet-Private1"
+      }
+    },
+    "PrivateRouteTable2": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": "VPC",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "${EnvironmentName} Private Routes (AZ2)"
+          }
+        ]
+      }
+    },
+    "DefaultPrivateRoute2": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": "PrivateRouteTable2",
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": "NatGateway2"
+      }
+    },
+    "Subnet-Private2RouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": "PrivateRouteTable2",
+        "SubnetId": "Subnet-Private2"
+      }
+    },
+    "NoIngressSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupName": "no-ingress-sg",
+        "GroupDescription": "Security group with no ingress rule",
+        "VpcId": "VPC"
+      }
+    }
+  },
+  "Outputs": {
+    "VPC": {
+      "Description": "A reference to the created VPC",
+      "Value": "VPC"
+    },
+    "PublicSubnets": {
+      "Description": "A list of the public subnets",
+      "Value": [
+        ",",
+        [
+          "Subnet-Public1",
+          "Subnet-Public2"
+        ]
+      ]
+    },
+    "PrivateSubnets": {
+      "Description": "A list of the private subnets",
+      "Value": [
+        ",",
+        [
+          "Subnet-Private1",
+          "Subnet-Private2"
+        ]
+      ]
+    },
+    "Subnet-Public1": {
+      "Description": "A reference to the public subnet in the 1st Availability Zone",
+      "Value": "Subnet-Public1"
+    },
+    "Subnet-Public2": {
+      "Description": "A reference to the public subnet in the 2nd Availability Zone",
+      "Value": "Subnet-Public2"
+    },
+    "Subnet-Private1": {
+      "Description": "A reference to the private subnet in the 1st Availability Zone",
+      "Value": "Subnet-Private1"
+    },
+    "Subnet-Private2": {
+      "Description": "A reference to the private subnet in the 2nd Availability Zone",
+      "Value": "Subnet-Private2"
+    },
+    "NoIngressSecurityGroup": {
+      "Description": "Security group with no ingress rule",
+      "Value": "NoIngressSecurityGroup"
+    }
+  }
+}
